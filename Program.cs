@@ -36,7 +36,7 @@ namespace Task3Project
             {
                 SolveEquation(inputParams, errorList);
             }
-            catch (Exception ex) 
+            catch (NotFoundException ex) 
             {
                 
                 FormatData(ex.Message, Severity.Error, ex.Data);
@@ -61,9 +61,14 @@ namespace Task3Project
                 switch (d)
                 {
                     case < 0:
-                        throw new Exception("Дискриминант меньше нуля");
+                        throw new NotFoundException("Дискриминант меньше нуля");
                     case 0:
-                        Console.WriteLine($"x = {-b/2 * a}");
+                        var answer =  -b / (2 * a);
+                        double result = 0;
+                        if (!Double.TryParse(answer.ToString(), out result) || Double.IsNaN(answer)) {
+                            throw new NotFoundException("Ошибка при попытке вычислить корни квадратного уравнения");
+                        }
+                        Console.WriteLine($"x = {answer}");
                         break;
                     case > 0:
                         Console.WriteLine($"x1 = {(-b + Math.Sqrt(d))/ (2 * a)}");
@@ -71,16 +76,16 @@ namespace Task3Project
                         break;
                 }
 
-            }catch (Exception e)
+            }catch (NotFoundException e)
             {
-                errorList.Add(new ErrorObject($"Вещественных значений не найдено", e.Message));
+                errorList.Clear();
+                errorList.Add(new ErrorObject($"Вещественных значений не найдено", String.Empty));
                 e.Data.Add("message", errorList);
                 FormatData(e.Message, Severity.Warning, e.Data);
-                
+
+                e=new NotFoundException(e.Message);
                 errorList.Clear();
-                errorList.Add(new ErrorObject($"Ошибка вычисления корней квадратного уравнения", e.Message));
-                
-                e = new Exception();
+                errorList.Add(new ErrorObject("Ошибка вычисления корней квадратного уравнения", String.Empty));
                 e.Data.Add("message", errorList);
                 throw e;
             }
@@ -157,8 +162,12 @@ namespace Task3Project
                     Console.Write("-");
                 }
                 Console.WriteLine();
-                Console.WriteLine(key.Parameter);
-                Console.WriteLine();
+                if (key.Parameter != String.Empty)
+                {
+                    Console.WriteLine(key.Parameter);
+                    Console.WriteLine();
+                }                
+
             }
             
             Console.ResetColor();
